@@ -3,7 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 def chamados_por_temporalidade(df: pd.DataFrame):
-    """Exibe gráficos de chamados por dia da semana e por hora do dia."""
+    """Exibe gráficos de chamados por dia da semana e por hora do dia com numeração exata."""
     
     # Chamados por dia da semana
     chamados_por_dia = df['Dia_Semana'].value_counts().sort_index()
@@ -17,6 +17,11 @@ def chamados_por_temporalidade(df: pd.DataFrame):
     plt.xlabel('Dia da Semana')
     plt.ylabel('Quantidade de Chamados')
     plt.xticks(rotation=45)
+
+    # Adicionando os valores no gráfico
+    for i, v in enumerate(chamados_por_dia.values):
+        plt.text(i, v + 0.1, str(v), ha='center', va='bottom', fontsize=11)
+    
     plt.tight_layout()
     plt.savefig('graficos/chamados_por_dia.png')  # Salvar o gráfico
     plt.show()
@@ -33,6 +38,11 @@ def chamados_por_temporalidade(df: pd.DataFrame):
     plt.xlabel('Hora do Dia')
     plt.ylabel('Quantidade de Chamados')
     plt.xticks(rotation=45)
+
+    # Adicionando os valores no gráfico para cada hora
+    for i, v in enumerate(chamados_por_hora.values):
+        plt.text(i, v + 0.1, str(v), ha='center', va='bottom', fontsize=11)
+
     plt.tight_layout()
     plt.savefig('graficos/chamados_por_hora.png')  # Salvar o gráfico
     plt.show()

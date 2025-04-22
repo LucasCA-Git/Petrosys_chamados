@@ -6,12 +6,14 @@ def tipos_de_chamado(df: pd.DataFrame, n=10):
     coluna_tipo = 'Item_do_Catálogo'
     if coluna_tipo in df.columns:
         print(f"\nTop {n} tipos de chamados mais frequentes:")
-        print(df[coluna_tipo].value_counts().head(n))
+        tipos_frequentes = df[coluna_tipo].value_counts().head(n)
+        print(tipos_frequentes)
 
         # Gerar gráfico para os tipos mais frequentes
-        tipos_frequentes = df[coluna_tipo].value_counts().head(n)
         plt.figure(figsize=(10, 6))
         tipos_frequentes.plot(kind='bar', color='skyblue')
+        for i, v in enumerate(tipos_frequentes.values):  # Mostrar valores exatos no gráfico
+            plt.text(i, v + 0.05, str(v), ha='center', va='bottom', fontsize=12)
         plt.title(f'Top {n} Tipos de Chamados mais Frequentes')
         plt.xlabel('Tipo de Chamado')
         plt.ylabel('Quantidade de Chamados')

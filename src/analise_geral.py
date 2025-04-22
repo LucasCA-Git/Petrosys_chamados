@@ -5,13 +5,46 @@ import seaborn as sns
 def resumo_geral(df: pd.DataFrame):
     """Exibe um resumo geral dos dados carregados."""
     
+    # Ordenar a coluna 'Dia_Semana' com a sequência correta
+    dias_da_semana = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    df['Dia_Semana'] = pd.Categorical(df['Dia_Semana'], categories=dias_da_semana, ordered=True)
+
     # Chamados por dia da semana
+    chamados_por_dia = df['Dia_Semana'].value_counts().sort_index()
+
     print("🔹 Chamados por dia da semana:")
-    print(df['Dia_Semana'].value_counts())
+    print(chamados_por_dia)
+
+    # Gráfico de chamados por dia da semana (com valores exatos)
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=chamados_por_dia.index, y=chamados_por_dia.values, palette='viridis')
+    for i, v in enumerate(chamados_por_dia.values):
+        plt.text(i, v + max(chamados_por_dia.values)*0.01, str(v), ha='center', va='bottom', fontsize=11)
+    plt.title('Chamados por dia da semana')
+    plt.xlabel('Dia da Semana')
+    plt.ylabel('Quantidade de Chamados')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig('graficos/chamados_por_dia.png')
+    plt.show()
 
     # Chamados por hora do dia
     print("\n🔹 Chamados por hora do dia:")
-    print(df['Hora'].value_counts().sort_index())
+    chamados_por_hora = df['Hora'].value_counts().sort_index()
+    print(chamados_por_hora)
+
+    # Gráfico de chamados por hora do dia (com valores exatos)
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=chamados_por_hora.index, y=chamados_por_hora.values, palette='Blues')
+    for i, v in enumerate(chamados_por_hora.values):
+        plt.text(i, v + max(chamados_por_hora.values)*0.01, str(v), ha='center', va='bottom', fontsize=11)
+    plt.title('Chamados por hora do dia')
+    plt.xlabel('Hora do Dia')
+    plt.ylabel('Quantidade de Chamados')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig('graficos/chamados_por_hora.png')
+    plt.show()
 
     # Percentual de chamados com avaliação
     if 'Avaliação' in df.columns:
@@ -32,28 +65,3 @@ def resumo_geral(df: pd.DataFrame):
         print(f"Tempo médio: {tempo_medio.mean()}")
     else:
         print("Colunas 'Iniciado_em' ou 'Finalizado_em' não encontradas.")
-    
-    # Gerar gráficos
-    # Gráfico de chamados por dia da semana
-    chamados_por_dia = df['Dia_Semana'].value_counts().sort_index()
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x=chamados_por_dia.index, y=chamados_por_dia.values, palette='viridis')
-    plt.title('Chamados por dia da semana')
-    plt.xlabel('Dia da Semana')
-    plt.ylabel('Quantidade de Chamados')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.savefig('graficos/chamados_por_dia.png')  # Salvar o gráfico
-    plt.show()
-
-    # Gráfico de chamados por hora do dia
-    chamados_por_hora = df['Hora'].value_counts().sort_index()
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x=chamados_por_hora.index, y=chamados_por_hora.values, palette='Blues')
-    plt.title('Chamados por hora do dia')
-    plt.xlabel('Hora do Dia')
-    plt.ylabel('Quantidade de Chamados')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.savefig('graficos/chamados_por_hora.png')  # Salvar o gráfico
-    plt.show()

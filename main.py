@@ -31,7 +31,7 @@ def gerar_grafico(dados, titulo, xlabel, ylabel, caminho_arquivo, tipo='bar', ho
 
 def gerar_grafico_item_catalogo_anual(df):
     if 'Item do Catálogo' in df.columns:
-        itens_catalogo = df['Item do Catálogo'].value_counts().head(30)  # Mostrar 30 itens
+        itens_catalogo = df['Item do Catálogo'].value_counts().head(15)  # Mostrar 30 itens
         gerar_grafico(
             dados=itens_catalogo,
             titulo='Top 30 Itens Mais Frequentes do Catálogo',
@@ -41,6 +41,57 @@ def gerar_grafico_item_catalogo_anual(df):
             horizontal=True,
             palette='Blues_r'
         )
+def gerar_grafico_chamados_por_hora(df, mes=None):
+    try:
+        # Converter a coluna de data e extrair a hora
+        df['Hora'] = pd.to_datetime(df['Iniciado em'], errors='coerce', dayfirst=True).dt.hour
+        
+        # Contar chamados por hora e garantir todas as horas (0-23)
+        chamados_por_hora = df['Hora'].value_counts().sort_index()
+        chamados_por_hora = chamados_por_hora.reindex(range(24), fill_value=0)
+        
+        # Configurar o gráfico
+        plt.figure(figsize=(16, 6))
+        ax = sns.barplot(x=chamados_por_hora.index, 
+                        y=chamados_por_hora.values, 
+                        palette='Blues')
+        
+        # Adicionar valores nas barras
+        for p in ax.patches:
+            if p.get_height() > 0:  # Só mostra valor se houver chamados
+                ax.text(p.get_x() + p.get_width()/2, 
+                       p.get_height() + 0.5, 
+                       f'{int(p.get_height())}', 
+                       ha='center')
+        
+        # Configurações do gráfico
+        titulo = 'Chamados por Hora do Dia' + (f' ({mes})' if mes else ' (Total Anual)')
+        plt.title(titulo, fontsize=14)
+        plt.xlabel('Hora do Dia', fontsize=12)
+        plt.ylabel('Quantidade de Chamados', fontsize=12)
+        plt.xticks(range(0, 24), fontsize=10)
+        plt.xlim(-0.5, 23.5)  # Garante que todas as horas sejam mostradas
+        
+        # Salvar o gráfico
+        caminho = f'graficos/chamados_por_hora_{mes.lower() if mes else "total"}.png'
+        plt.tight_layout()
+        plt.savefig(caminho, dpi=300, bbox_inches='tight')
+        plt.close()
+        
+    except Exception as e:
+        print(f"Erro ao gerar gráfico de chamados por hora: {str(e)}")
+
+
+def gerar_todos_os_graficos_chamados_por_hora(df):
+    df['Iniciado em'] = pd.to_datetime(df['Iniciado em'], errors='coerce', dayfirst=True)
+    df = df.dropna(subset=['Iniciado em'])  # Garante que datas inválidas sejam removidas
+
+    # Gera gráficos mensais automaticamente
+    df['Mes_Nome'] = df['Iniciado em'].dt.month.apply(lambda x: calendar.month_name[x].capitalize())
+    meses_unicos = df['Mes_Nome'].unique()
+
+    for mes in meses_unicos:
+        gerar_grafico_chamados_por_hora(df, mes)
 
 def gerar_grafico_chamados_por_dia(df, mes=None):
     try:
@@ -85,9 +136,12 @@ def gerar_grafico_clientes_frequentes(df, mes=None):
             palette='viridis'
         )
 
+#graficos mensais
 def gerar_graficos_mensais(df, mes):
     gerar_grafico_chamados_por_dia(df, mes)
     gerar_grafico_clientes_frequentes(df, mes)
+    gerar_grafico_chamados_por_hora(df, mes)
+  
 
 def consolidar_dados_mensais(diretorio_dados):
     arquivos = [f for f in os.listdir(diretorio_dados) if f.endswith('.xlsx')]
@@ -104,9 +158,11 @@ def consolidar_dados_mensais(diretorio_dados):
             print(f"Erro ao processar {arquivo}: {str(e)}")
 
     return df_total
+    
 
 def gerar_relatorios_consolidados(diretorio_dados):
     os.makedirs('graficos', exist_ok=True)
+
 
     try:
         df_total = consolidar_dados_mensais(diretorio_dados)
@@ -115,7 +171,8 @@ def gerar_relatorios_consolidados(diretorio_dados):
         gerar_grafico_item_catalogo_anual(df_total)
         gerar_grafico_chamados_por_dia(df_total)
         gerar_grafico_clientes_frequentes(df_total)
-        
+        gerar_grafico_chamados_por_hora(df_total)
+
         # Salvar consolidado
         caminho_anual = os.path.join(diretorio_dados, 'dados_anuais.xlsx')
         df_total.to_excel(caminho_anual, index=False)

@@ -1,9 +1,15 @@
 import os
+from pathlib import Path
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GRAPHS_DIR = os.path.join(BASE_DIR,'graficos')
-DATA_DIR = os.path.join(BASE_DIR, 'dados_tiflux')  # Pasta com os Excel originais
+# Diretório base do projeto
+BASE_DIR = Path(__file__).parent.parent.resolve()
 
-# Garante que as pastas existam
-os.makedirs(GRAPHS_DIR, exist_ok=True)
-os.makedirs(DATA_DIR, exist_ok=True)
+# Diretório para salvar os gráficos
+GRAPHS_DIR = BASE_DIR / 'app' / 'static' / 'graficos'
+
+# Diretório para salvar os dados
+DATA_DIR = BASE_DIR / 'dados_tiflux'
+
+# Cria os diretórios, se não existirem
+GRAPHS_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
